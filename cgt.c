@@ -4,31 +4,21 @@
 #include <stdbool.h>
 #include <time.h>
 
-// Function prototypes
 void findFundamentalCutsetsAndCircuits(int adjMatrix[][100], int weights[][100], int parent[], int n);
 int minKey(int key[], bool mstSet[], int n);
 void DFS(int adjMatrix[][100], int u, bool visited[], int n);
-bool isConnected(int adjMatrix[][100], int n);
-void articulationPointsUtil(int adjMatrix[][100], int u, bool visited[], int disc[], int low[], int parent[], bool ap[], int n);
-void findArticulationPoints(int adjMatrix[][100], int n);
-int findEdgeConnectivity(int adjMatrix[][100], int n);
-void checkKConnectivity(int adjMatrix[][100], int n);
-int edgeConnectivityUtil(int adjMatrix[][100], int u, int v, int n);
 
-// Structure for a heap node
 typedef struct {
     int degree;
     int vertex;
 } HeapNode;
 
-// Function to swap two heap nodes
 void swap(HeapNode* a, HeapNode* b) {
     HeapNode temp = *a;
     *a = *b;
     *b = temp;
 }
 
-// Function to heapify a subtree rooted with node i
 void heapify(HeapNode heap[], int n, int i) {
     int largest = i;
     int left = 2 * i + 1;
@@ -46,14 +36,14 @@ void heapify(HeapNode heap[], int n, int i) {
     }
 }
 
-// Function to build a max heap
+// to build max heap
 void buildHeap(HeapNode heap[], int n) {
     for (int i = n / 2 - 1; i >= 0; i--) {
         heapify(heap, n, i);
     }
 }
 
-// Function to delete the max element from the heap
+//delete the max element from the heap
 HeapNode delMax(HeapNode heap[], int* n) {
     HeapNode maxNode = heap[0];
     heap[0] = heap[*n - 1];
@@ -62,7 +52,6 @@ HeapNode delMax(HeapNode heap[], int* n) {
     return maxNode;
 }
 
-// Function to insert a new element into the heap
 void insertHeap(HeapNode heap[], int* n, int degree, int vertex) {
     heap[*n].degree = degree;
     heap[*n].vertex = vertex;
@@ -72,29 +61,27 @@ void insertHeap(HeapNode heap[], int* n, int degree, int vertex) {
     }
 }
 
-// Function to merge two heaps
 void mergeHeaps(HeapNode heap[], int* n, HeapNode h1[], int* n1) {
     for (int i = 0; i < *n1; i++) {
         insertHeap(heap, n, h1[i].degree, h1[i].vertex);
     }
 }
 
-// Function to generate a random weight
 int generateRandomWeight() {
     return rand() % 10 + 1;  // Random weight between 1 and 10
 }
 
-// Function to implement Bellman-Ford algorithm
+//Bellman-Ford algorithm
 void bellmanFord(int adjMatrix[][100], int weights[][100], int n, int src) {
     int dist[n];
 
-    // Step 1: Initialize distances from src to all other vertices as INFINITE
+    // Step 1: initialize distances from src to all other vertices as infinite
     for (int i = 0; i < n; i++) {
         dist[i] = INT_MAX;
     }
     dist[src] = 0;
 
-    // Step 2: Relax all edges |V| - 1 times
+    // Step 2: iterate all edges |V| - 1 times
     for (int i = 0; i < n - 1; i++) {
         for (int u = 0; u < n; u++) {
             for (int v = 0; v < n; v++) {
@@ -114,8 +101,6 @@ void bellmanFord(int adjMatrix[][100], int weights[][100], int n, int src) {
             }
         }
     }
-
-    // Print the shortest distances
     printf("Vertex Distance from Source %d:\n", src);
     for (int i = 0; i < n; i++) {
         if (dist[i] == INT_MAX) {
@@ -126,7 +111,7 @@ void bellmanFord(int adjMatrix[][100], int weights[][100], int n, int src) {
     }
 }
 
-// Function to find the vertex with the minimum key value
+//finding the vertex with the minimum key value
 int minKey(int key[], bool mstSet[], int n) {
     int min = INT_MAX, minIndex;
 
@@ -142,22 +127,19 @@ int minKey(int key[], bool mstSet[], int n) {
 
 // Function to implement Prim's algorithm for MST and print the MST path
 void primMST(int adjMatrix[][100], int weights[][100], int n) {
-    int parent[n]; // Array to store constructed MST
-    int key[n];    // Key values to pick minimum weight edges
-    bool mstSet[n]; // To keep track of vertices included in the MST
+    int parent[n]; //array to store constructed MST
+    int key[n];    //to pick minimum weight edges
+    bool mstSet[n]; //track of vertices included in the MST
 
-    // Initialize all keys as INFINITE and mstSet[] as false
     for (int i = 0; i < n; i++) {
         key[i] = INT_MAX;
         mstSet[i] = false;
     }
 
-    key[0] = 0;   // Start from the first vertex
-    parent[0] = -1; // Root of the MST
-
-    // The MST will have n-1 edges
+    key[0] = 0;   
+    parent[0] = -1; //root
     for (int count = 0; count < n - 1; count++) {
-        // Pick the minimum key vertex not yet included in the MST
+        // Pick the minimum key vertex not included in the MST
         int u = minKey(key, mstSet, n);
 
         // Add the picked vertex to the MST set
@@ -178,7 +160,7 @@ void primMST(int adjMatrix[][100], int weights[][100], int n) {
         printf("%d - %d: %d\n", parent[i], i, weights[i][parent[i]]);
     }
 
-    // Find fundamental cutsets and circuits
+    // fundamental cutsets and circuits
     findFundamentalCutsetsAndCircuits(adjMatrix, weights, parent, n);
 }
 
@@ -200,153 +182,67 @@ void findFundamentalCutsetsAndCircuits(int adjMatrix[][100], int weights[][100],
                 } else {
                     printf("Cycle: %d -> %d (No further parent)\n", u, v);
                 }
-
-                // Print fundamental cutset
                 printf("Fundamental Cutset for edge (%d, %d): { %d, %d }\n", u, v, u, v);
             }
         }
     }
 }
-
-// DFS to check if the graph is connected
-void DFS(int adjMatrix[][100], int u, bool visited[], int n) {
-    visited[u] = true;
-    for (int v = 0; v < n; v++) {
-        if (adjMatrix[u][v] && !visited[v]) {
-            DFS(adjMatrix, v, visited, n);
-        }
-    }
-}
-
-// Check if the graph is connected
-bool isConnected(int adjMatrix[][100], int n) {
-    bool visited[n];
-    for (int i = 0; i < n; i++) {
-        visited[i] = false;
-    }
-
-    DFS(adjMatrix, 0, visited, n);
-
-    for (int i = 0; i < n; i++) {
-        if (!visited[i]) {
-            return false;
-        }
-    }
-    return true;
-}
-
-// Utility function to find edge connectivity using max-flow like technique
-int edgeConnectivityUtil(int adjMatrix[][100], int u, int v, int n) {
-    int cutset = 0;
-    bool visited[n];
-    for (int i = 0; i < n; i++) {
-        visited[i] = false;
-    }
-
-    DFS(adjMatrix, u, visited, n);
-    if (!visited[v]) {
-        return 1;  // Direct cut found
-    }
-
-    return cutset;
-}
-
-// Find the edge connectivity λ of the graph
-int findEdgeConnectivity(int adjMatrix[][100], int n) {
-    int minCut = INT_MAX;
-
-    for (int u = 0; u < n; u++) {
-        for (int v = u + 1; v < n; v++) {
-            if (adjMatrix[u][v] == 1) {
-                int cut = edgeConnectivityUtil(adjMatrix, u, v, n);
-                if (cut < minCut) {
-                    minCut = cut;
-                }
-            }
-        }
-    }
-
-    return minCut;
-}
-
-// Utility function for articulation points (find vertex connectivity κ)
-void articulationPointsUtil(int adjMatrix[][100], int u, bool visited[], int disc[], int low[], int parent[], bool ap[], int n) {
-    static int time = 0;
-    int children = 0;
-
-    visited[u] = true;
-    disc[u] = low[u] = ++time;
-
-    for (int v = 0; v < n; v++) {
-        if (adjMatrix[u][v]) {
-            if (!visited[v]) {
-                children++;
-                parent[v] = u;
-                articulationPointsUtil(adjMatrix, v, visited, disc, low, parent, ap, n);
-
-                low[u] = (low[u] < low[v]) ? low[u] : low[v];
-
-                if (parent[u] == -1 && children > 1) {
-                    ap[u] = true;
-                }
-
-                if (parent[u] != -1 && low[v] >= disc[u]) {
-                    ap[u] = true;
-                }
-            } else if (v != parent[u]) {
-                low[u] = (low[u] < disc[v]) ? low[u] : disc[v];
+void sortDesc(int* degrees, int n) {
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - 1 - i; j++) {
+            if (degrees[j] < degrees[j + 1]) {
+                int temp = degrees[j];
+                degrees[j] = degrees[j + 1];
+                degrees[j + 1] = temp;
             }
         }
     }
 }
 
-// Find articulation points (vertex connectivity κ)
-void findArticulationPoints(int adjMatrix[][100], int n) {
-    bool visited[n];
-    int disc[n];
-    int low[n];
-    int parent[n];
-    bool ap[n];
-
-    for (int i = 0; i < n; i++) {
-        visited[i] = false;
-        parent[i] = -1;
-        ap[i] = false;
-    }
-
-    for (int i = 0; i < n; i++) {
-        if (!visited[i]) {
-            articulationPointsUtil(adjMatrix, i, visited, disc, low, parent, ap, n);
+//minimum degree in the array
+int findMinDegree(int* degrees, int n) {
+    int minDegree = degrees[0];
+    for (int i = 1; i < n; i++) {
+        if (degrees[i] < minDegree) {
+            minDegree = degrees[i];
         }
     }
-
-    int vertexConnectivity = 0;
-    printf("\nArticulation points (Critical Vertices):\n");
+    return minDegree;
+}
+// Havel-Hakimi algorithm
+int havelHakimi(int* degrees, int n) {
+    int* temp = (int*)malloc(n * sizeof(int));
     for (int i = 0; i < n; i++) {
-        if (ap[i]) {
-            printf("Vertex %d\n", i);
-            vertexConnectivity++;
+        temp[i] = degrees[i];
+    }
+    while (1) {
+        sortDesc(temp, n);
+        if (temp[0] == 0) {
+            free(temp);
+            return 1; // Sequence is graphical
+        }
+        int d = temp[0];
+        temp[0] = 0;
+        if (d >= n || d < 0) {
+            free(temp);
+            return 0; // Sequence is not graphical
+        }
+        for (int i = 1; i <= d; i++) {
+            temp[i]--;
+            if (temp[i] < 0) {
+                free(temp);
+                return 0; // Sequence is not graphical
+            }
         }
     }
-
-    if (vertexConnectivity == 0) {
-        printf("The graph is fully connected (No articulation points).\n");
-    }
-
-    printf("Vertex Connectivity (κ) = %d\n", vertexConnectivity);
+}
+// K-connectivity
+int kConnectivity(int* degrees, int n) {
+    int minDegree = findMinDegree(degrees, n);
+    return minDegree - 1; // k-connectivity is minimum degree - 1
 }
 
-// Check the K-connectivity of the graph
-void checkKConnectivity(int adjMatrix[][100], int n) {
-    int edgeConnectivity = findEdgeConnectivity(adjMatrix, n);
-    findArticulationPoints(adjMatrix, n);
-    printf("\nEdge Connectivity (λ) = %d\n", edgeConnectivity);
 
-    int K = edgeConnectivity;  // Typically K-connectivity is the same as edge connectivity
-    printf("The graph is %d-connected (K-connectivity).\n", K);
-}
-
-// Main function to implement the algorithm
 int main() {
     srand(time(0));  // Seed for random number generation
 
@@ -357,12 +253,12 @@ int main() {
     int degrees[n];
     HeapNode heap[n];
     HeapNode h1[n];
-    int adjMatrix[100][100]; // Assuming maximum 100 vertices for simplicity
-    int weights[100][100];   // Weights for the edges
+    int adjMatrix[100][100]; 
+    int weights[100][100];   
     int heapSize = 0;
     int h1Size = 0;
 
-    printf("Enter the degree sequence: ");
+    printf("Enter the degree sequence:\n");
     for (int i = 0; i < n; i++) {
         scanf("%d", &degrees[i]);
         heap[i].degree = degrees[i];
@@ -370,7 +266,7 @@ int main() {
         heapSize++;
     }
 
-    // Initialize the adjacency matrix with zeros and assign random weights
+    // Initialize the adjacency matrix
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
             adjMatrix[i][j] = 0;
@@ -410,7 +306,6 @@ int main() {
         mergeHeaps(heap, &heapSize, h1, &h1Size);
     }
 
-    // Print the adjacency matrix and weights
     printf("Adjacency Matrix:\n");
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
@@ -426,18 +321,27 @@ int main() {
         }
         printf("\n");
     }
-
-    // Perform Bellman-Ford algorithm from a given source vertex
+    // Perform Bellman-Ford algorithm 
     int src;
     printf("\nEnter the source vertex for Bellman-Ford: ");
     scanf("%d", &src);
     bellmanFord(adjMatrix, weights, n, src);
 
-    // Perform Prim's algorithm to find the MST and fundamental cutsets/circuits
+    // Perform Prim's algorithm 
     primMST(adjMatrix, weights, n);
+    if (havelHakimi(degrees, n)) {
+        printf("The degree sequence is graphical.\n");
+        int edgeConnectivity = findMinDegree(degrees, n);
+        int vertexConnectivity = findMinDegree(degrees, n);
+        int kConnectivityValue = kConnectivity(degrees, n);
 
-    // Find the edge connectivity, vertex connectivity, and K-connectivity
-    checkKConnectivity(adjMatrix, n);
+        printf("Edge Connectivity: %d\n", edgeConnectivity);
+        printf("Vertex Connectivity: %d\n", vertexConnectivity);
+        printf("k-Connectivity: %d\n", kConnectivityValue);
+    } else {
+        printf("The degree sequence is not graphical.\n");
+    }
+
 
     return 0;
 }
